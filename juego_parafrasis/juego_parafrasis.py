@@ -20,6 +20,18 @@ feather_img = tk.PhotoImage(file='imagenes/feather(original)1.png')
 feather_img = feather_img.subsample(23)
 letters_img = tk.PhotoImage(file='imagenes/letters.png')
 letters_img = letters_img.subsample(3)
+# Cargar las imágenes de las preguntas
+img1 = tk.PhotoImage(file='imagenes/01.png')
+img2 = tk.PhotoImage(file='imagenes/02.png')
+img3 = tk.PhotoImage(file='imagenes/03.png')
+img4 = tk.PhotoImage(file='imagenes/04.png')
+img5 = tk.PhotoImage(file='imagenes/05.png')
+img6 = tk.PhotoImage(file='imagenes/06.png')
+img7 = tk.PhotoImage(file='imagenes/07.png')
+img8 = tk.PhotoImage(file='imagenes/08.png')
+img9 = tk.PhotoImage(file='imagenes/09.png')
+img10 = tk.PhotoImage(file='imagenes/10.png')
+quizz_img = [img1.subsample(3), img2.subsample(2), img3, img4.subsample(4), img5.subsample(3), img6.subsample(2), img7, img8, img9, img10.subsample(3)]
 # Cargar las imágenes de los resultados
 face00 = tk.PhotoImage(file='imagenes/face00.png')
 face01 = tk.PhotoImage(file='imagenes/face01.png')
@@ -27,6 +39,10 @@ face02 = tk.PhotoImage(file='imagenes/face02.png')
 face03 = tk.PhotoImage(file='imagenes/face03.png')
 face04 = tk.PhotoImage(file='imagenes/face04.png')
 img_list = [face00.subsample(2), face01.subsample(2), face02.subsample(2), face03.subsample(2), face04.subsample(2)]
+
+# Crear un marco que contendrá las etiquetas, botones, etc.
+frame = tk.Frame(raiz, bg='white', padx=50, pady=50)
+frame.place(relx=0.05, rely=0.05, relheight=0.88, relwidth=0.9)
 
 # Función para borrar la pantalla de resultados y regresar a la pantalla principal
 def back_main():
@@ -139,6 +155,8 @@ def creacion_lit(number, label):
 	global word_counter
 	global text_list
 	global text_file
+	global quizz_img
+	global quizz_img_label
 
 	lista_muestra = []
 
@@ -152,6 +170,7 @@ def creacion_lit(number, label):
 		instructions_label.place_forget()
 		instructions_label2.place_forget()
 		start_button.place_forget()
+
 		with open("textos/Lista01.txt", "r", encoding='utf8') as doc:
 			lista = doc.read()
 			lista = lista.split() #len = 190
@@ -176,6 +195,7 @@ def creacion_lit(number, label):
 		list_label8.grid_forget()
 		list_label9.grid_forget()
 		list_label10.grid_forget()
+		quizz_img_label.grid_forget()
 		count_label.grid_forget()
 		entry.grid_forget()
 		next_button.grid_forget()
@@ -187,6 +207,8 @@ def creacion_lit(number, label):
 			if elemento in lista_muestra:
 				val = 1
 			lista_muestra.append(lista[random.randint(189 + val)]) 
+
+		val = random.randint(10)
 
 		# Crear etiquetas del juego, la entrada y el botón
 		list_label = tk.Label(frame, text="Lista:", bg='white', font=('Arial', 12, 'bold'))
@@ -201,9 +223,10 @@ def creacion_lit(number, label):
 		list_label8 = tk.Label(frame, text=lista_muestra[8], bg='white', font=('Arial', 12))
 		list_label9 = tk.Label(frame, text=lista_muestra[9], bg='white', font=('Arial', 12))
 		list_label10 = tk.Label(frame, text='Tu oración:', bg='white', font=('Arial', 12, 'bold'), justify='left')
+		quizz_img_label = tk.Label(frame, image=quizz_img[val])
 		count_label = tk.Label(frame, text=str(number + 1) + " de 10", bg='white', font=('Arial', 12, 'bold'), justify='right')
-		entry = tk.Entry(frame)
-		next_button = tk.Button(frame, text=">>", bg="#412fe0", fg='white', font=('Arial', 12), command=lambda: creacion_lit(number+1,0))
+		entry = tk.Entry(frame, bd=4)
+		next_button = tk.Button(frame, text=">>", bg="#412fe0", fg='white', font=('Arial', 12, 'bold'), command=lambda: creacion_lit(number+1,0))
 		# Colocar la lista y los demás elementos
 		list_label.grid(row=0,column=0)
 		list_label0.grid(row=1,column=0)
@@ -217,11 +240,12 @@ def creacion_lit(number, label):
 		list_label8.grid(row=9,column=0)
 		list_label9.grid(row=10,column=0)
 		list_label10.grid(row=0, column=1)
+		quizz_img_label.grid(row=7, column=1, columnspan=5, rowspan=10,padx=40)
 		count_label.grid(row=0, column=2)
 		entry.grid(row=1, column=1, columnspan=2, padx=50, rowspan=2, ipadx=180, ipady=10)
-		next_button.grid(row=3, column=2)
+		next_button.grid(row=3, column=2, ipadx=20, ipady=0.2)
 	else:
-		with open('parafrasis' + str(text_file) + '.txt', 'w') as doc:
+		with open('NoParafrasis' + str(text_file) + '.txt', 'w') as doc:
 			for elemento in text_list:
 				doc.write(elemento)
 				doc.write('\n')
@@ -233,27 +257,126 @@ def parafrasis_baja(number, label):
 	global instructions_label2
 	global instructions_label
 	global instructions_label2
+	global sentence_label
+	global sentence_label0
+	global sentence_label1
+	global sentence_label2
+	global sentence_label3
+	global sentence_label4
+	global count_label
+	global entry
+	global next_button
 	global start_button
 	global boton_regresar
+	global lista
+	global lista2
+	global counter
+	global word_counter
+	global text_list
+	global text_file
+	global quizz_img
+	global quizz_img_label
+	global sentence
+
+	lista_muestra = []
 
 	if label == 1:
+		# reiniciar el contador y la lista de oraciones
+		counter = 0
+		sentence = random.randint(2)
+		text_list = []
+		lista2 = []
 		# Borrar las instrucciones
 		instructions_label.place_forget()
 		instructions_label2.place_forget()
 		instructions_label.place_forget()
 		instructions_label2.place_forget()
 		start_button.place_forget()
+
+		with open("textos/cocina_molecular.txt", "r", encoding='utf8') as doc:
+			lista = doc.read()
+			lista = lista.split('\n') #len = 21
+			for elemento in lista:
+				strings = elemento.split()
+				for string in strings:
+					lista2.append(string.lower())
+
+	else:
+		# Calcular las palabras usadas en la caja de texto anterior
+		word_counter = entry.get()
+		text_list.append(word_counter)
+		word_counter = word_counter.split()
+		for elemento in word_counter:
+			if elemento.lower() not in lista2:
+				counter += 1
+		# Borrar la lista anterior para poner la nueva
+		sentence_label.place_forget()
+		sentence_label0.place_forget()
+		sentence_label1.place_forget()
+		sentence_label2.place_forget()
+		sentence_label3.place_forget()
+		sentence_label4.place_forget()
+		quizz_img_label.place_forget()
+		count_label.place_forget()
+		entry.place_forget()
+		next_button.place_forget()
 	# Habrán diez preguntas distintas antes de terminar el juego
 	if number < 10:
-		pass
+		val = random.randint(10)
+		# Crear etiquetas del juego, la entrada y el botón
+		# Si la oración no cabe en la pantalla, hay que dividirla
+		sentence1 = ''
+		sentence2 = ''
+		sentence3 = ''
+		sentence4 = ''
+		if len(lista[sentence]) > 90:
+			sentence1 = lista[sentence][:86]
+			if len(lista[sentence]) > 180:
+				if len(lista[sentence]) > 270:
+					sentence2 = lista[sentence][86:176]
+					sentence3 = lista[sentence][176:266]
+					sentence4 = lista[sentence][266:]
+				else:
+					sentence2 = lista[sentence][86:176]
+					sentence3 = lista[sentence][176:]
+			else:
+				sentence2 = lista[sentence][86:]
+		else:
+			sentence1 = lista[sentence]
 
-	# Crear etiqueta para las instrucciones
+		# Crear las etiquetas del juego
+		sentence_label = tk.Label(frame, text="Oración original: ", bg='white', font=('Arial', 20, 'bold'))
+		sentence_label0 = tk.Label(frame, text=sentence1, bg='white', font=('Arial', 12))
+		sentence_label1 = tk.Label(frame, text=sentence2, bg='white', font=('Arial', 12))
+		sentence_label2 = tk.Label(frame, text=sentence3, bg='white', font=('Arial', 12))
+		sentence_label3 = tk.Label(frame, text=sentence4, bg='white', font=('Arial', 12))
+		sentence_label4 = tk.Label(frame, text='Tu oración:', bg='white', font=('Arial', 20, 'bold'), anchor='e')
+		quizz_img_label = tk.Label(frame, image=quizz_img[val])
+		count_label = tk.Label(frame, text=str(number + 1) + " de 10", bg='white', font=('Arial', 20, 'bold'), justify='right')
+		entry = tk.Entry(frame, bd=4, font=('Arial', 11))
+		next_button = tk.Button(frame, text=">>", bg="#412fe0", fg='white', font=('Arial', 12, 'bold'), command=lambda: parafrasis_baja(number+1,0))
+		# Colocar la lista y los demás elementos
+		sentence_label.place(relx=-0.07, rely=0.05)
+		sentence_label0.place(relx=0, rely=0.14)
+		sentence_label1.place(relx=0, rely=0.185)
+		sentence_label2.place(relx=0, rely=0.23)
+		sentence_label3.place(relx=0, rely=0.275)
+		sentence_label4.place(relx=-0.07, rely=0.375)
+		entry.place(relx=-0.07, rely=0.475, relwidth=1.1, relheight=0.09)
+		next_button.place(relx=0.88, rely=0.585, relwidth=0.1, relheight=0.08)
+		count_label.place(relx=0.7, rely=0.05)
+		quizz_img_label.place(relx=0, rely=0.58)
 
-	# Juego
-	
-	# Botón para regresar a la pantalla principal
-	boton_regresar = tk.Button(frame, text="click", comman=main_title)
-	boton_regresar.place(x=20,y=20)
+		sentence += 2
+
+	else:
+		with open('ParafrasisBaja' + str(text_file) + '.txt', 'w') as doc:
+			for elemento in text_list:
+				doc.write(elemento)
+				doc.write('\n')
+		print(counter)
+		results(counter)
+
 
 def deploy_instructions(nivel):
 	global instructions_label
@@ -320,11 +443,7 @@ def delete_main_label(nivel):
 
 	deploy_instructions(nivel)
 
-
-# Crear un marco que contendrá las etiquetas, botones, etc.
-frame = tk.Frame(raiz, bg='white', padx=50, pady=50)
-frame.place(relx=0.05, rely=0.05, relheight=0.88, relwidth=0.9)
-
+# Función para mostrar la pantalla principal
 def main_title():
 	# Introducir las etiquetas y botones de la pantalla principal en la función
 	global main_label
