@@ -1,6 +1,7 @@
 import tkinter as tk
 from PIL import ImageTk, Image
 from numpy import random
+from nltk.stem import WordNetLemmatizer
 
 # Variables de la ventana
 HEIGHT = 600
@@ -154,6 +155,7 @@ def creacion_lit(number, label):
 	global counter
 	global word_counter
 	global text_list
+	global word_list
 	global text_file
 	global quizz_img
 	global quizz_img_label
@@ -164,6 +166,9 @@ def creacion_lit(number, label):
 		# reiniciar el contador y la lista de oraciones
 		counter = 0
 		text_list = []
+		word_list = []
+		# Crear el objeto para lematizar las palabras
+		lemmatizer = WordNetLemmatizer()
 		# Borrar las instrucciones
 		instructions_label.place_forget()
 		instructions_label2.place_forget()
@@ -204,9 +209,14 @@ def creacion_lit(number, label):
 		val = 0
 		# Crear lista de palabras provicional
 		for elemento in range(10):
-			if elemento in lista_muestra:
-				val = 1
-			lista_muestra.append(lista[random.randint(189 + val)]) 
+			# Elegir una palabra al azar
+			word = lista[random.randint(189)]
+			# Si la palabra ya se encuentra en la misma lista, se elige otra palabra
+			if word in lista_muestra:
+				while word in lista_muestra:
+					word = lista[random.randint(189)]
+			lista_muestra.append(word)
+			
 
 		val = random.randint(10)
 
