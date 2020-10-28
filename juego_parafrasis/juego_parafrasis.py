@@ -4,9 +4,20 @@ from numpy import random
 from nltk.stem import WordNetLemmatizer
 
 # Variables de la ventana
+# Diccionario para acceder a los textos
+#### Agregar longitud palabras sushi y texto
+dict_textos = {"sushi":["Lista00", "sushi0", 212, 28, "Sushi"], "cocina":["Lista01", "cocina_molecular", 189, 21, "Cocina"]}
 HEIGHT = 600
 WIDTH = 800
 text_file = 0
+# Número de oraciones por juego
+oraciones = 5 
+# Acceder al texto predeterminado
+topic = "cocina"
+lista_texto = dict_textos[topic][0]
+parafrasis_texto = dict_textos[topic][1]
+num_rand = dict_textos[topic][2]
+sentence_length = dict_textos[topic][3]
 
 raiz = tk.Tk()
 raiz.title("Corpus Paráfrasis")
@@ -21,6 +32,10 @@ feather_img = tk.PhotoImage(file='imagenes/feather(original)1.png')
 feather_img = feather_img.subsample(23)
 letters_img = tk.PhotoImage(file='imagenes/letters.png')
 letters_img = letters_img.subsample(3)
+sushi = tk.PhotoImage(file='imagenes/sushi.png')
+sushi = sushi.subsample(12)
+cocina = tk.PhotoImage(file='imagenes/cocina.png')
+cocina = cocina.subsample(15)
 # Cargar las imágenes de las preguntas
 img1 = tk.PhotoImage(file='imagenes/01.png')
 img2 = tk.PhotoImage(file='imagenes/02.png')
@@ -44,6 +59,19 @@ img_list = [face00.subsample(2), face01.subsample(2), face02.subsample(2), face0
 # Crear un marco que contendrá las etiquetas, botones, etc.
 frame = tk.Frame(raiz, bg='white', padx=50, pady=50)
 frame.place(relx=0.05, rely=0.05, relheight=0.88, relwidth=0.9)
+
+# Función para elegir un texto para el juego
+def elegirTexto(opcion):
+	global lista_texto
+	global parafrasis_texto
+	global num_rand
+	global sentence_length
+
+	topic = "cocina" if (opcion == 1) else "sushi"
+	lista_texto = dict_textos[topic][0]
+	parafrasis_texto = dict_textos[topic][1]
+	num_rand = dict_textos[topic][2]
+	sentence_length = dict_textos[topic][3]
 
 # Función para borrar la pantalla de resultados y regresar a la pantalla principal
 def back_main():
@@ -176,7 +204,7 @@ def creacion_lit(number, label):
 		instructions_label2.place_forget()
 		start_button.place_forget()
 
-		with open("textos/Lista01.txt", "r", encoding='utf8') as doc:
+		with open("textos/" + lista_texto + ".txt", "r", encoding='utf8') as doc:
 			lista = doc.read()
 			lista = lista.split() #len = 190
 
@@ -205,18 +233,46 @@ def creacion_lit(number, label):
 		entry.grid_forget()
 		next_button.grid_forget()
 	# Habrán diez preguntas distintas antes de terminar el juego
-	if number < 10:
+	if number < oraciones:
 		val = 0
-		# Crear lista de palabras provicional
-		for elemento in range(10):
-			# Elegir una palabra al azar
-			word = lista[random.randint(189)]
-			# Si la palabra ya se encuentra en la misma lista, se elige otra palabra
-			if word in lista_muestra:
-				while word in lista_muestra:
-					word = lista[random.randint(189)]
-			lista_muestra.append(word)
-			
+
+		# En las tres primeras partes, se toman palabras al azar del total de la lista
+		if number < 3:
+			# Crear lista de palabras provicional
+			for elemento in range(10):
+				# Elegir una palabra al azar
+				word = lista[random.randint(num_rand)]
+				# Si la palabra ya se encuentra en la misma lista, se elige otra palabra
+				if word in lista_muestra:
+					while word in lista_muestra:
+						word = lista[random.randint(num_rand)]
+				lista_muestra.append(word)
+		# En las dos últimas rondas, se muestran palabras de una misma oración en cada una
+		else:
+			with open("textos/" + parafrasis_texto + ".txt", "r", encoding='utf8') as doc:
+					paraphrasis_text = doc.read()
+					paraphrasis_text = paraphrasis_text.split("\n")
+
+			# Elegir una oración al azar
+			sentence = paraphrasis_text[random.randint(sentence_length)]
+			sentence = sentence.split()
+			print(sentence)
+
+			for word in sentence:
+				for elemento in lista:
+					if len(word) > 3:
+						if word[:5] in elemento:
+							if elemento not in lista_muestra:
+								lista_muestra.append(elemento)	
+
+			# Llenar la lista en caso de que no hubiera 10 palabras en la oración
+			if(len(lista_muestra) < 11):
+				while(len(lista_muestra) < 11):
+					word = lista[random.randint(num_rand)]
+					if word in lista_muestra:
+						while word in lista_muestra:
+							word = lista[random.randint(num_rand)]
+					lista_muestra.append(word)
 
 		val = random.randint(10)
 
@@ -234,7 +290,7 @@ def creacion_lit(number, label):
 		list_label9 = tk.Label(frame, text=lista_muestra[9], bg='white', font=('Arial', 12))
 		list_label10 = tk.Label(frame, text='Tu oración:', bg='white', font=('Arial', 12, 'bold'), justify='left')
 		quizz_img_label = tk.Label(frame, image=quizz_img[val])
-		count_label = tk.Label(frame, text=str(number + 1) + " de 10", bg='white', font=('Arial', 12, 'bold'), justify='right')
+		count_label = tk.Label(frame, text=str(number + 1) + " de " + str(oraciones), bg='white', font=('Arial', 12, 'bold'), justify='right')
 		entry = tk.Entry(frame, bd=4)
 		next_button = tk.Button(frame, text=">>", bg="#412fe0", fg='white', font=('Arial', 12, 'bold'), command=lambda: creacion_lit(number+1,0))
 		# Colocar la lista y los demás elementos
@@ -293,7 +349,7 @@ def parafrasis_baja(number, label):
 	if label == 1:
 		# reiniciar el contador y la lista de oraciones
 		counter = 0
-		sentence = random.randint(2)
+		sentence = random.randint(sentence_length//2)
 		text_list = []
 		lista2 = []
 		# Borrar las instrucciones
@@ -303,7 +359,7 @@ def parafrasis_baja(number, label):
 		instructions_label2.place_forget()
 		start_button.place_forget()
 
-		with open("textos/cocina_molecular.txt", "r", encoding='utf8') as doc:
+		with open("textos/" + parafrasis_texto + ".txt", "r", encoding='utf8') as doc:
 			lista = doc.read()
 			lista = lista.split('\n') #len = 21
 			for elemento in lista:
@@ -331,7 +387,8 @@ def parafrasis_baja(number, label):
 		entry.place_forget()
 		next_button.place_forget()
 	# Habrán diez preguntas distintas antes de terminar el juego
-	if number < 10:
+	if number < oraciones:
+		# Valor para elegir una imagen al azar
 		val = random.randint(10)
 		# Crear etiquetas del juego, la entrada y el botón
 		# Si la oración no cabe en la pantalla, hay que dividirla
@@ -362,7 +419,7 @@ def parafrasis_baja(number, label):
 		sentence_label3 = tk.Label(frame, text=sentence4, bg='white', font=('Arial', 12))
 		sentence_label4 = tk.Label(frame, text='Tu oración:', bg='white', font=('Arial', 20, 'bold'), anchor='e')
 		quizz_img_label = tk.Label(frame, image=quizz_img[val])
-		count_label = tk.Label(frame, text=str(number + 1) + " de 10", bg='white', font=('Arial', 20, 'bold'), justify='right')
+		count_label = tk.Label(frame, text=str(number + 1) + " de " + str(oraciones), bg='white', font=('Arial', 20, 'bold'), justify='right')
 		entry = tk.Entry(frame, bd=4, font=('Arial', 11))
 		next_button = tk.Button(frame, text=">>", bg="#412fe0", fg='white', font=('Arial', 12, 'bold'), command=lambda: parafrasis_baja(number+1,0))
 		# Colocar la lista y los demás elementos
@@ -384,7 +441,6 @@ def parafrasis_baja(number, label):
 			for elemento in text_list:
 				doc.write(elemento)
 				doc.write('\n')
-		print(counter)
 		results(counter)
 
 
@@ -421,6 +477,8 @@ def delete_main_label(nivel):
 	global boton_regresar
 	global instructions_text
 	global instructions_text2
+	global boton_sushi
+	global boton_cocina
 	# Borrar la pantalla principal
 	main_label.place_forget()
 	main_label2.place_forget()
@@ -429,6 +487,8 @@ def delete_main_label(nivel):
 	letters_label.place_forget()
 	boton_facil.place_forget()
 	boton_medio.place_forget()
+	boton_sushi.place_forget()
+	boton_cocina.place_forget()
 
 	# Etiquetas para las instrucciones
 	# Instrucciones para el nivel fácil
@@ -464,6 +524,8 @@ def main_title():
 	global boton_facil
 	global boton_medio
 	global boton_regresar
+	global boton_sushi
+	global boton_cocina
 
 	try:
 		# Borrar el botón de regresar
@@ -488,11 +550,15 @@ def main_title():
 	letters_label.place(relx=0.2, rely=0.6)
 
 	# Crear botones del menú principal
-	boton_facil = tk.Button(frame, text='Fácil', bg='#412fe0', fg='white', font=12, command=lambda: delete_main_label(1))
-	boton_medio = tk.Button(frame, text='Medio', bg='#412fe0', fg='white', font=12, command=lambda: delete_main_label(2))
+	boton_facil = tk.Button(frame, text='Creatividad', bg='#412fe0', fg='white', font=12, command=lambda: delete_main_label(1))
+	boton_medio = tk.Button(frame, text='Paráfrasis', bg='#412fe0', fg='white', font=12, command=lambda: delete_main_label(2))
+	boton_sushi = tk.Button(frame, image=sushi, bg='white', command=lambda: elegirTexto(0))
+	boton_cocina = tk.Button(frame, image=cocina, bg='white', command=lambda: elegirTexto(1))
 	# Colocar botones del menú principal
 	boton_facil.place(relx=0.4, rely=0.48, relheight=0.07, relwidth=0.2)
 	boton_medio.place(relx=0.4, rely=0.68, relheight=0.07, relwidth=0.2)
+	boton_sushi.place(relx=0.01, rely=0.9, relheight=0.08, relwidth=0.08)
+	boton_cocina.place(relx=0.1, rely=0.9, relheight=0.08, relwidth=0.08)
 
 
 main_title()
